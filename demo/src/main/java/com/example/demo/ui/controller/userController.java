@@ -16,7 +16,7 @@ import java.text.MessageFormat;
 // import java.util.ArrayList;
 // import java.util.List;
 
-import org.springframework.beans.BeanUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -40,7 +40,8 @@ public class userController {
 
         userResponse returnedUser = new userResponse();
         UserDto userDto = userService.findUserByUserId(id);
-        BeanUtils.copyProperties(userDto, returnedUser);
+        ModelMapper modelMapper = new ModelMapper();
+        returnedUser = modelMapper.map(userDto, userResponse.class);
 
         return returnedUser;
     }
@@ -54,10 +55,10 @@ public class userController {
         if (userDetails.getFirstName().isEmpty())
             throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
 
-        UserDto userDto = new UserDto();
-        BeanUtils.copyProperties(userDetails, userDto);
+        ModelMapper modelMapper = new ModelMapper();
+        UserDto userDto = modelMapper.map(userDetails, UserDto.class);
         UserDto createdUser = userService.createUser(userDto);
-        BeanUtils.copyProperties(createdUser, returnedUser);
+        returnedUser = modelMapper.map(createdUser, userResponse.class);
 
         return returnedUser;
 
@@ -73,10 +74,10 @@ public class userController {
         if (userDetails.getFirstName().isEmpty())
             throw new UserServiceException(ErrorMessages.MISSING_REQUIRED_FIELD.getErrorMessage());
 
-        UserDto userDto = new UserDto();
-        BeanUtils.copyProperties(userDetails, userDto);
-        UserDto createdUser = userService.updateUser(id, userDto);
-        BeanUtils.copyProperties(createdUser, returnedUser);
+        ModelMapper modelMapper = new ModelMapper();
+        UserDto userDto = modelMapper.map(userDetails, UserDto.class);
+        UserDto updatedUser = userService.updateUser(id, userDto);
+        returnedUser = modelMapper.map(updatedUser, userResponse.class);
 
         return returnedUser;
     }
